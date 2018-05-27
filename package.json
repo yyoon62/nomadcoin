@@ -1,0 +1,10 @@
+{
+  "name": "nomadcoin",
+  "version": "1.0.0",
+  "description": "coin in node js",
+  "main": "src/server.js",
+  "repository": "https://github.com/yyoon62/nomadcoin.git",
+  "author": "Young Yoon",
+  "license": "MIT",
+  "private": false
+}
