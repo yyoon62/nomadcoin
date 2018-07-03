@@ -1,5 +1,10 @@
+"use strict";
+
 const CryptoJS = require("crypto-js"),
-  hexToBinary = require("hex-to-binary");
+  hexToBinary = require("hex-to-binary"),
+  Wallet = require("./wallet");
+
+const { getPublicFromWallet, getBalance } = Wallet;
 
 class Block {
   constructor(index, hash, previousHash, timestamp, data, difficulty, nonce){
@@ -21,9 +26,11 @@ const genesisBlock = new Block(
   "this is genesis block!",
   0,
   0
-)
+);
 
 let blockchain = [genesisBlock];
+
+let uTxOuts = [];
 
 const BLOCK_GENERATION_TIME = 10;
 
@@ -62,7 +69,7 @@ const findNewDifficulty = (newestBlock, blockchain) => {
   } else {
     return lastCalculatedBlock.difficulty;
   }
-}
+};
 
 const createNewBlock = data => {
   const previousBlock = getNewestBlock();
@@ -103,7 +110,7 @@ const findBlock = (index, previousHash, timestamp, data, difficulty) => {
         difficulty,
         nonce
       );
-    };
+    }
     nonce++; 
   }
 };
@@ -128,13 +135,13 @@ const isTimestampValid = (newBlock, oldBlock) => {
 
 const isBlockValid = (candidateBlock, latestBlock) => {
   if (!isBlockStructureValid(candidateBlock)) {
-    log.console("the structure of the block is not valid")
-    return false
+    console.log("the structure of the block is not valid");
+    return false;
   } else if (latestBlock.index + 1 !== candidateBlock.index) {
-    log.console("the candidate block contains wrong index");
+    console.log("the candidate block contains wrong index");
     return false;
   } else if (latestBlock.hash !== candidateBlock.previousHash) {
-    log.console("the candidate block's previous block has the wrong hash");
+    console.log("the candidate block's previous block has the wrong hash");
     return false;
   } else if (candidateBlock.hash !== getBlocksHash(candidateBlock)) {
     console.log("the hash of this block is invalid");
@@ -162,7 +169,7 @@ const isChainValid = (candidateChain) => {
     return JSON.stringify(block) === JSON.stringify(genesisBlock);
   };
   if (!isGenesisValid(candidateChain[0])) {
-    console.log("The candidateChain's genesisBlock is not the same as our genesisBlock")
+    console.log("The candidateChain's genesisBlock is not the same as our genesisBlock");
     return false;
   }
   for (let i=1; i < candidateChain.length; i++) {
@@ -171,7 +178,7 @@ const isChainValid = (candidateChain) => {
     }
   }
   return true;
-}
+};
 
 const sumDifficulty = anyBlockchain => 
   anyBlockchain
@@ -199,11 +206,14 @@ const addBlockToChain = candidateBlock => {
   }
 };
 
+const getAccountBalance = () => getBalance(getPublicFromWallet(), uTxOuts);
+
 module.exports = {
   getBlockchain,
   createNewBlock,
   getNewestBlock,
   isBlockStructureValid,
   replaceChain,
-  addBlockToChain
+  addBlockToChain,
+  getAccountBalance
 };
